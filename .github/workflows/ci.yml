@@ -12,6 +12,17 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        service:
+          - auth
+          - gateway
+          - orders
+          - order-service
+          - product-service
+          - user-service
+          - frontend
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
