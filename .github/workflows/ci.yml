@@ -46,18 +46,18 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
-        run: |
-          if [ "${{ matrix.service }}" == "frontend" ]; then
-            BUILD_PATH="projects/boutique-microservices/frontend"
-          else
-            BUILD_PATH="projects/boutique-microservices/backend/services/${{ matrix.service }}"
-          fi
+      run: |
+        if [ "${{ matrix.service }}" == "frontend" ]; then
+          BUILD_PATH="projects/boutique-microservices/frontend"
+        else
+          BUILD_PATH="projects/boutique-microservices/backend/services/${{ matrix.service }}"
+        fi
 
-          echo "Building from $BUILD_PATH"
+        echo "Building from $BUILD_PATH"
 
-          docker build \
-            -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/${{ matrix.service }}:$IMAGE_TAG \
-          $BUILD_PATH
+        docker build \
+          -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/${{ matrix.service }}:$IMAGE_TAG \
+        $BUILD_PATH
 
     - name: Push Docker Image
       run: |
@@ -65,7 +65,7 @@ jobs:
         echo "Pushing $IMAGE_URI"
         docker push $IMAGE_URI
 
- update-manifests:
+update-manifests:
     runs-on: ubuntu-latest
     needs: build-and-push
     permissions:
