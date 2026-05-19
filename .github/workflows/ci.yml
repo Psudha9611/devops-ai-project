@@ -66,7 +66,6 @@ jobs:
           SERVICE_PATH="${{ steps.service-path.outputs.path }}"
           cd $SERVICE_PATH
           npm test -- --coverage --watchAll=false 2>&1 || echo "Tests completed with exit code: $?"
-        continue-on-error: true
 
   sonarqube-analysis:
     runs-on: ubuntu-latest
@@ -99,7 +98,6 @@ jobs:
         env:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        continue-on-error: true
 
   build-and-push:
     runs-on: ubuntu-latest
@@ -172,8 +170,7 @@ jobs:
         with:
           image-ref: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/${{ matrix.service }}:$IMAGE_TAG
           scan-type: 'fs'
-          scanners: 'secret'
-          format: 'table'
+          format: 'sarif'
           output: 'trivy-results-${{ matrix.service }}.sarif'
           severity: 'CRITICAL,HIGH'
         continue-on-error: true
