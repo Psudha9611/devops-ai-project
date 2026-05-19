@@ -164,8 +164,7 @@ jobs:
           image-ref: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/${{ matrix.service }}:$IMAGE_TAG
           scan-type: 'fs'
           scanners: 'secret'
-          format: table
-          format: 'sarif'
+          format: 'table'
           output: 'trivy-results-${{ matrix.service }}.sarif'
           severity: 'CRITICAL,HIGH'
         continue-on-error: true
