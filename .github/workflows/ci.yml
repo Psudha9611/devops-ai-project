@@ -120,6 +120,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Determine service path
+        id: service-path
+        run: |
+          if [ "${{ matrix.service }}" == "frontend" ]; then
+            echo "path=projects/boutique-microservices/frontend" >> $GITHUB_OUTPUT
+          else
+            echo "path=projects/boutique-microservices/backend/services/${{ matrix.service }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -181,12 +190,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'config'
-          scan-ref: |
-            if [ "${{ matrix.service }}" == "frontend" ]; then
-              echo "projects/boutique-microservices/frontend"
-            else
-              echo "projects/boutique-microservices/backend/services/${{ matrix.service }}"
-            fi
+          scan-ref: ${{ steps.service-path.outputs.path }}
           format: 'sarif'
           output: 'trivy-config-${{ matrix.service }}.sarif'
         continue-on-error: true
