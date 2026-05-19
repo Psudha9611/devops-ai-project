@@ -162,6 +162,8 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/${{ matrix.service }}:$IMAGE_TAG
+          scan-type: 'fs'
+          scanners: 'secret'
           format: 'sarif'
           output: 'trivy-results-${{ matrix.service }}.sarif'
           severity: 'CRITICAL,HIGH'
