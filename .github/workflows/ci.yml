@@ -171,29 +171,48 @@ jobs:
             -f $BUILD_PATH/Dockerfile \
             $BUILD_PATH
 
-      - name: Run Trivy vulnerability scan on Docker image
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/${{ matrix.service }}:$IMAGE_TAG
-          scan-type: 'image'
-          format: 'sarif'
-          output: 'trivy-results-${{ matrix.service }}.sarif'
-          severity: 'CRITICAL,HIGH'
+      - name: Trivy Security Scan
 
-      - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v4
-        if: always()
-        with:
-          sarif_file: 'trivy-results-${{ matrix.service }}.sarif'
-          category: 'trivy-${{ matrix.service }}'
+      permissions:
+  contents: read
+  security-events: write
 
-      - name: Scan Dockerfile with Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'config'
-          scan-ref: ${{ steps.service-path.outputs.path }}
-          format: 'sarif'
-          output: 'trivy-config-${{ matrix.service }}.sarif'
+steps:
+  - name: Run Trivy vulnerability scan on Docker image
+    uses: aquasecurity/trivy-action@master
+    with:
+      image-ref: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+      scan-type: image
+      format: sarif
+      output: trivy-results-${{ matrix.service }}.sarif
+      severity: CRITICAL,HIGH
+
+  - name: Verify SARIF file exists
+    run: |
+      ls -la
+      test -f trivy-results-${{ matrix.service }}.sarif
+
+  - name: Upload Trivy results to GitHub Security
+    uses: github/codeql-action/upload-sarif@v3
+    if: always() && hashFiles(format('trivy-results-{0}.sarif', matrix.service)) != ''
+    with:
+      sarif_file: trivy-results-${{ matrix.service }}.sarif
+      category: trivy-${{ matrix.service }}
+
+  - name: Scan Dockerfile with Trivy
+    uses: aquasecurity/trivy-action@master
+    with:
+      scan-type: config
+      scan-ref: ${{ steps.service-path.outputs.path }}
+      format: sarif
+      output: trivy-config-${{ matrix.service }}.sarif
+
+  - name: Upload Dockerfile scan results
+    uses: github/codeql-action/upload-sarif@v3
+    if: always() && hashFiles(format('trivy-config-{0}.sarif', matrix.service)) != ''
+    with:
+      sarif_file: trivy-config-${{ matrix.service }}.sarif
+      category: trivy-config-${{ matrix.service }}
 
       - name: Push Docker Image
         run: |
