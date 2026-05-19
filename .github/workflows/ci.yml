@@ -38,7 +38,7 @@ jobs:
           aws ecr get-login-password --region $AWS_REGION | \
           docker login --username AWS \
           --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
-     
+
       - name: Build Docker Image
         run: |
           if [ "${{ matrix.service }}" == "frontend" ]; then
@@ -51,12 +51,12 @@ jobs:
 
           docker build \
             -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/${{ matrix.service }}:$IMAGE_TAG \
-          $BUILD_PATH
-
+            -f $BUILD_PATH/Dockerfile \
+            $BUILD_PATH
 
       - name: Push Docker Image
         run: |
-          IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ matrix.service }}:${{ github.sha }}
+          IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ matrix.service }}:$IMAGE_TAG
           echo "Pushing $IMAGE_URI"
           docker push $IMAGE_URI
 
@@ -87,8 +87,4 @@ jobs:
 
       - name: Commit and push updated manifests
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add gitops/k8s/
-          git diff --staged --quiet || git commit -m "ci: update image tags to ${{ github.sha }}"
-          git push
+          git config user.name](#)
