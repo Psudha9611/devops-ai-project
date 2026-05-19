@@ -174,7 +174,6 @@ jobs:
           format: 'sarif'
           output: 'trivy-results-${{ matrix.service }}.sarif'
           severity: 'CRITICAL,HIGH'
-        continue-on-error: true
 
       - name: Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@v2
@@ -182,7 +181,6 @@ jobs:
         with:
           sarif_file: 'trivy-results-${{ matrix.service }}.sarif'
           category: 'trivy-${{ matrix.service }}'
-        continue-on-error: true
 
       - name: Scan Dockerfile with Trivy
         uses: aquasecurity/trivy-action@master
@@ -191,7 +189,6 @@ jobs:
           scan-ref: ${{ steps.service-path.outputs.path }}
           format: 'sarif'
           output: 'trivy-config-${{ matrix.service }}.sarif'
-        continue-on-error: true
 
       - name: Push Docker Image
         run: |
